@@ -1,0 +1,69 @@
+version: '3'
+services:
+  app:
+    build: .
+    networks:
+      robottestsnw: {}
+    volumes:
+      - .:/usr/app/
+      - /usr/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - selenium_hub
+      - firefox
+    environment:
+        - HUB_HOST=selenium-hub
+        - BROWSER=firefox
+
+  selenium_hub:
+    image: selenium/hub:4.7.2-20221219
+    container_name: selenium_hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    networks:
+      robottestsnw: {}
+
+  firefox:
+    image: selenium/node-firefox:4.7.2-20221219
+    shm_size: 2gb
+    depends_on:
+      - selenium_hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium_hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      robottestsnw: {}
+
+
+  # chrome:
+  #   image: selenium/node-chrome:109.0.5414.119-chromedriver-109.0.5414.74-20230131
+  #   ports:
+  #     - 5555:5555
+  #   expose:
+  #     - 5555 
+  #   shm_size: 2gb
+  #   depends_on:
+  #     - selenium_hub
+  #   environment:
+  #     - SE_EVENT_BUS_HOST=selenium_hub
+  #     - SE_EVENT_BUS_PUBLISH_PORT=4442
+  #     - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  #     - HUB_PORT_4444_TCP_ADDR=selenium_hub
+  #     - HUB_PORT_4444_TCP_PORT=4444
+    # privileged: true
+    # volumes:
+    #   - /dev/shm:/dev/shm
+    # networks:
+    #   robottestsnw: {}  
+
+networks:
+  robottestsnw:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2001:0DB8::/112

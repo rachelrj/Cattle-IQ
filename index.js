@@ -1,21 +1,28 @@
-const express = require('express');
-const { Builder, By } = require('selenium-webdriver');
+const { Builder, By, Options, Browser } = require('selenium-webdriver');
+const firefox = require('selenium-webdriver/firefox');
+const options = new firefox.Options();
 
-const app = express();
-const port = 3000;
-app.get('/montanalivestockauction', async (request, response) => {
-try {
-    const data = await WebScrapingTest();
-    response.status(200).json(data);
+async function runScrape() {
+    options.addArguments('--no-sandbox')
+    options.addArguments('--disable-dev-shm-usage')
+    options.addArguments("--disable-extensions")
+    let driver = new Builder()
+    .setFirefoxOptions(options)
+    .forBrowser(Browser.FIREFOX)
+    .usingServer('http://localhost:4444/wd/hub')
+    .build(); 
+
+    try {
+        await driver.get('https://www.montanalivestockauction.com/market-reports');
+        const data = await WebScrapingTest(driver);
+        console.log(data);
+        return data;
     } catch (error) {
-    response.status(500).json({
-        message: 'Server error occurred',
-    });
+            return error;
+    } finally {
+            await driver.quit();
     }
-});
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-});
+}
 
 async function getDate(driver) {
     const section = await driver.findElement(By.id("section-content"))
@@ -52,12 +59,10 @@ async function addRows(sales, tbody, calfOrYearling, date) {
       }
 }
 
-async function WebScrapingTest() {
+async function WebScrapingTest(driver) {
     let sales = [];
 
     try {
-      driver = await new Builder().forBrowser('chrome').build();
-      await driver.get('https://www.montanalivestockauction.com/market-reports');
       const date = await getDate(driver);
 
       const yearlingButton = driver.findElement(By.xpath("//*[text()='YEARLING']"));
@@ -75,7 +80,8 @@ async function WebScrapingTest() {
       return sales;
     } catch (error) {
       console.log(error);
-    } finally {
-      await driver.quit();
     }
 }
+
+runScrape();
+
