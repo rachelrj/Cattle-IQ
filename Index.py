@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.service import Service as FirefoxService
 import re
 from datetime import datetime
 
@@ -12,7 +13,8 @@ def run_scrape():
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-extensions')
 
-    driver = webdriver.Firefox(options=options, service_log_path='/dev/null')
+    service = FirefoxService(log_path=None)
+    driver = webdriver.Firefox(service=service, options=options)
     wait = WebDriverWait(driver, 10)
 
     try:
