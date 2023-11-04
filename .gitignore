@@ -1,2 +1,4 @@
 # .gitignore
 node_modules/
+geckodriver.log
+**/__pycache__/
