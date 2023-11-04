@@ -1,11 +1,11 @@
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.service import Service as FirefoxService
-import re
+from selenium.webdriver.firefox.options import Options
 from datetime import datetime
+import re
 
 def run_scrape():
     options = Options()
@@ -13,8 +13,11 @@ def run_scrape():
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-extensions')
 
-    service = FirefoxService(log_path=None)
-    driver = webdriver.Firefox(service=service, options=options)
+    # Specify the URL of your Selenium Hub
+    hub_url = "http://localhost:4444/wd/hub"
+
+    # Use Remote WebDriver with options
+    driver = webdriver.Remote(command_executor=hub_url, options=options)
     wait = WebDriverWait(driver, 10)
 
     try:
@@ -49,7 +52,8 @@ def add_rows(sales, tbody, type_, date):
             "price": tds[4].text,
             "unit": tds[5].text,
             "type": type_,
-            "date": date
+            "date": date,
+            "auction": "montanalivestock"
         }
         sales.append(info)
 
@@ -63,10 +67,8 @@ def web_scraping_test(driver, wait):
         buttons = driver.find_elements(By.XPATH, "//a[@role='tab' and contains(@class, 'nav-link')]")
         for button in buttons:
             type_ = button.text.strip().upper()  # Assuming the type is the button text
-            # Each click is wrapped in a try-except block
             try:
                 wait.until(EC.element_to_be_clickable(button)).click()
-                print(f"Clicked {type_} button")
                 
                 # Wait for the corresponding table to load
                 # We assume the table ID follows a specific pattern based on the button text

@@ -1,14 +1,25 @@
-FROM node:18-alpine
-RUN CHROMEDRIVER_VERSION=109.0.5414.74 npm install -g chromedriver --chromedriver_version=109.0.5414.74
-RUN npm install -g geckodriver
-RUN mkdir -p /usr/app/node_modules && chown -R node:node /usr/app
-COPY . /usr/app/
-WORKDIR /usr/app
-RUN npm install
-COPY --chown=node:node . .
+FROM python:3.9-slim
 
-RUN mkdir /opt/google
-RUN mkdir /opt/google/chrome
-RUN ln -s /usr/bin/google-chrome /opt/google/chrome/google-chrome
+ENV GECKODRIVER_VERSION=0.30.0
+
+WORKDIR /usr/app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN apt-get update && \
+    apt-get install -yqq unzip curl firefox-esr wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN wget -O- https://github.com/mozilla/geckodriver/releases/download/v$GECKODRIVER_VERSION/geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz | tar -xz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/geckodriver
+
 EXPOSE 3000
-ENTRYPOINT ["node", "index.js"]
+
+CMD ["python", "Index.py"]
+
+
+
+
+
