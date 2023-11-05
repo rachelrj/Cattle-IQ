@@ -17,7 +17,7 @@ RUN wget -O- https://github.com/mozilla/geckodriver/releases/download/v$GECKODRI
 
 EXPOSE 3000
 
-CMD ["python", "Index.py"]
+CMD ["python", "index.py"]
 
 
 
