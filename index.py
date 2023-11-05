@@ -15,7 +15,7 @@ def run_scrapes():
     # TODO: Fix this. Avoid the need to sleep.
     time.sleep(300)
 
-    options = Options()
+    options = webdriver.FirefoxOptions()
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-extensions')
