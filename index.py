@@ -1,13 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options
-from datetime import datetime
-import re
+import os
+import importlib
 
-def run_scrape():
+def run_scrapes():
     options = Options()
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
@@ -18,72 +16,22 @@ def run_scrape():
 
     # Use Remote WebDriver with options
     driver = webdriver.Remote(command_executor=hub_url, options=options)
-    wait = WebDriverWait(driver, 10)
 
-    try:
-        driver.get('https://www.montanalivestockauction.com/market-reports')
-        data = web_scraping_test(driver, wait)
-        print(data)
-        return data
-    except Exception as error:
-        return str(error)
-    finally:
-        driver.quit()
+    scripts_directory = "scripts"
 
-def get_date(driver, wait):
-    section = wait.until(EC.presence_of_element_located((By.ID, "section-content")))
-    text = section.text
-    date_match = re.search(
-        r'(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|(Nov|Dec)(?:ember)?)\s+\d{1,2},\s+\d{4}', text)
-    if date_match:
-        parsed_date = datetime.strptime(date_match.group(), '%B %d, %Y')
-        return parsed_date.date().isoformat()
-    return None
+    script_files = [f for f in os.listdir(scripts_directory) if f.endswith(".py")]
 
-def add_rows(sales, tbody, type_, date):
-    rows = tbody.find_elements(By.TAG_NAME, 'tr')
-    for row in rows:
-        tds = row.find_elements(By.TAG_NAME, 'td')
-        info = {
-            "seller": tds[0].text,
-            "head": tds[1].text,
-            "kind": tds[2].text,
-            "weight": tds[3].text,
-            "price": tds[4].text,
-            "unit": tds[5].text,
-            "type": type_,
-            "date": date,
-            "auction": "montanalivestock"
-        }
-        sales.append(info)
+    for script_file in script_files:
+        try:
+            module_name = script_file[:-3]
+            module = importlib.import_module(f"{scripts_directory}.{module_name}")    
+            if hasattr(module, "run_scrape"):
+                module.run_scrape(driver)
+                print("\n\n\n")
+        except Exception as error:
+            print(str(error))
 
-def web_scraping_test(driver, wait):
-    sales = []
-
-    try:
-        date = get_date(driver, wait)
-
-        # Find all buttons with the specified class name and loop through them
-        buttons = driver.find_elements(By.XPATH, "//a[@role='tab' and contains(@class, 'nav-link')]")
-        for button in buttons:
-            type_ = button.text.strip().upper()  # Assuming the type is the button text
-            try:
-                wait.until(EC.element_to_be_clickable(button)).click()
-                
-                # Wait for the corresponding table to load
-                # We assume the table ID follows a specific pattern based on the button text
-                table_id = type_.lower()
-                tab_panel = wait.until(EC.presence_of_element_located((By.ID, table_id)))
-                tbody = tab_panel.find_element(By.TAG_NAME, 'tbody')
-                add_rows(sales, tbody, type_, date)
-
-            except Exception as e:
-                print(f"Error clicking on {type_} button or processing its data:", e)
-
-    except Exception as e:
-        print("Error in web_scraping_test:", e)
-
-    return sales
+    driver.quit()
 
 if __name__ == "__main__":
-    run_scrape()
+    run_scrapes()
