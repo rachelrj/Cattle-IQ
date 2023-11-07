@@ -1,0 +1,47 @@
+name: cattle_scraper
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    branches:
+      - main
+
+jobs:
+  build_push_services:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Start Docker Compose
+        run: docker-compose up -d
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push cattle-iq-app image to Amazon ECR
+        id: build-cattle-iq-app
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build and push cattle-iq-app image to ECR 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:cattle-iq-app-$IMAGE_TAG -f Dockerfile .
+          echo "Pushing cattle-iq-app image to ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:cattle-iq-app-$IMAGE_TAG
+          echo "name=cattle-iq-app-image::$ECR_REGISTRY/$ECR_REPOSITORY:cattle-iq-app-$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Stop Docker Compose
+        run: docker-compose down

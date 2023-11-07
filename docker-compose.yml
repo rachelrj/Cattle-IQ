@@ -35,29 +35,7 @@ services:
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
     networks:
-      robottestsnw: {}
-
-
-  # chrome:
-  #   image: selenium/node-chrome:109.0.5414.119-chromedriver-109.0.5414.74-20230131
-  #   ports:
-  #     - 5555:5555
-  #   expose:
-  #     - 5555 
-  #   shm_size: 2gb
-  #   depends_on:
-  #     - selenium_hub
-  #   environment:
-  #     - SE_EVENT_BUS_HOST=selenium_hub
-  #     - SE_EVENT_BUS_PUBLISH_PORT=4442
-  #     - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-  #     - HUB_PORT_4444_TCP_ADDR=selenium_hub
-  #     - HUB_PORT_4444_TCP_PORT=4444
-    # privileged: true
-    # volumes:
-    #   - /dev/shm:/dev/shm
-    # networks:
-    #   robottestsnw: {}  
+      robottestsnw: {} 
 
 networks:
   robottestsnw:
