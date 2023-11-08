@@ -35,9 +35,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest
         run: |
-          # Build and push cattle-iq-app image to ECR 
+          # Build and push cattle-iq-app image to ECR with the "latest" tag
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:cattle-iq-app-$IMAGE_TAG -f Dockerfile .
           echo "Pushing cattle-iq-app image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:cattle-iq-app-$IMAGE_TAG
