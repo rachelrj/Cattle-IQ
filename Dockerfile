@@ -1,6 +1,9 @@
-FROM python:3.9-slim
+FROM python:3.11
 
 ENV GECKODRIVER_VERSION=0.30.0
+
+COPY . /usr/app
+COPY requirements.txt /usr/app
 
 WORKDIR /usr/app
 
@@ -18,8 +21,3 @@ RUN wget -O- https://github.com/mozilla/geckodriver/releases/download/v$GECKODRI
 EXPOSE 3000
 
 CMD ["python", "index.py"]
-
-
-
-
-

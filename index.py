@@ -11,8 +11,11 @@ def run_scrapes():
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-extensions')
 
-    # Specify the URL of your Selenium Hub
+    # Use locally to connect to hub
     hub_url = "http://localhost:4444/wd/hub"
+
+    # Use within container to connect to hub
+    # hub_url = "http://selenium_hub:4444/wd/hub"
 
     # Use Remote WebDriver with options
     driver = webdriver.Remote(command_executor=hub_url, options=options)

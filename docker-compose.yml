@@ -16,7 +16,7 @@ services:
         - BROWSER=firefox
 
   selenium_hub:
-    image: selenium/hub:4.7.2-20221219
+    image: selenium/hub:4.15.0-20231108
     container_name: selenium_hub
     ports:
       - "4442:4442"
@@ -26,7 +26,7 @@ services:
       robottestsnw: {}
 
   firefox:
-    image: selenium/node-firefox:4.7.2-20221219
+    image: selenium/node-firefox:4.15.0-20231108
     shm_size: 2gb
     depends_on:
       - selenium_hub
