@@ -4,20 +4,28 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options
 import os
 import importlib
+import time
 
 def run_scrapes():
+
+    # Even though the container with this script waits for selenium_hub
+    # and firefox node to be created, it still was erroring out.
+    # After I added this time.sleep(300), it started working. 
+    # Comment out if testing.
+    # TODO: Fix this. Avoid the need to sleep.
+    time.sleep(300)
+
     options = Options()
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-extensions')
 
     # Use locally to connect to hub
-    hub_url = "http://localhost:4444/wd/hub"
+    # hub_url = "http://localhost:4444/wd/hub"
 
     # Use within container to connect to hub
-    # hub_url = "http://selenium_hub:4444/wd/hub"
+    hub_url = "http://selenium_hub:4444/wd/hub"
 
-    # Use Remote WebDriver with options
     driver = webdriver.Remote(command_executor=hub_url, options=options)
 
     scripts_directory = "scripts"

@@ -36,13 +36,12 @@ def scrape_data_for_date(date, driver):
         return json.dumps(data_list, indent=2)
     except NoSuchElementException:
         print(f"No data available for {date}.")
-        return json.dumps([])  # Return an empty list in JSON format if no data was found
+        return json.dumps([])
 
 def run_scrape(driver):
     past_seven_dates_no_zeros = generate_past_dates()
     all_data = []
     for date in past_seven_dates_no_zeros:
-        # Check for a 404 status code using requests
         url = f"https://sidneylivestock.com/{date}/"
         try:
             response = requests.head(url)
@@ -61,7 +60,7 @@ def run_scrape(driver):
         except WebDriverException as e:
             print(f"Selenium error occurred while processing {date}: {str(e)}")
             all_data.append({"date": date, "error": str(e), "data": None})
-        except Exception as e:  # Catch all other exeptions
+        except Exception as e:
             print(f"An error occurred while processing {date}: {str(e)}")
             all_data.append({"date": date, "error": str(e), "data": None}) 
     print(all_data)   
