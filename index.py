@@ -21,10 +21,11 @@ def run_scrapes():
     options.add_argument('--disable-extensions')
 
     # Use locally to connect to hub
-    # hub_url = "http://localhost:4444/wd/hub"
+    # Use on AWS container to connect to hub
+    hub_url = "http://localhost:4444/wd/hub"
 
-    # Use within container to connect to hub
-    hub_url = "http://selenium_hub:4444/wd/hub"
+    # Use within docker local container to connect to hub
+    # hub_url = "http://selenium_hub:4444/wd/hub"
 
     driver = webdriver.Remote(command_executor=hub_url, options=options)
 

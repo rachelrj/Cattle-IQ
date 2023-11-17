@@ -1,0 +1,34 @@
+name: cattle_scraper
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    branches:
+      - main
+
+jobs:
+  build_push_services:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        id: terraform_init
+        run: |
+          terraform init
+
+      - name: Terraform Apply
+        id: terraform_apply
+        run: |
+          terraform apply -auto-approve
