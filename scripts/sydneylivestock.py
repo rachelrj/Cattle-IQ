@@ -25,7 +25,7 @@ def scrape_data_for_date(date, driver):
         figures = driver.find_elements(By.CLASS_NAME, "wp-block-table")
         for figure in figures:
             table = figure.find_element(By.TAG_NAME, 'table')
-            headers = [header.text for header in table.find_elements(By.TAG_NAME, 'th')]
+            headers = [header.text.replace(':', '') for header in table.find_elements(By.TAG_NAME, 'th')]
             rows = table.find_elements(By.TAG_NAME, 'tr')[1:]  # Skip the header row
             for row in rows:
                 cells = row.find_elements(By.TAG_NAME, 'td')
