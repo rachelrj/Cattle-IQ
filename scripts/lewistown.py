@@ -24,7 +24,6 @@ def get_report_data(driver, link):
 
     try:
         converted_date = datetime.strptime(match, '%b %d, %Y').strftime('%Y-%m-%d')
-        print(f"Original Date: {match}, Converted Date: {converted_date}")
     except ValueError:
         print(f"Failed to convert date: {match}")
 
