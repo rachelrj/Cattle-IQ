@@ -60,7 +60,7 @@ def web_scraping_logic(driver, wait):
         report_title = header.text.strip()
         
         table_data = parse_table_data(table, date, report_title)
-        store_data(table_data, date,"cattleiq/westernlivestockauction")
+        store_data(date, table_data, "cattleiq/westernlivestockauction")
         market_data.extend(table_data)
     
     return market_data
