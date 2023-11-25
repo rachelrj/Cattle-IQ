@@ -62,4 +62,4 @@ def run_scrape(driver):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
-    store_data(date, json.dumps(report_data), "cattleiq/lewistown")
+    store_data(date, report_data, "cattleiq/lewistown")

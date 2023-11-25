@@ -61,7 +61,7 @@ def run_scrape(driver):
 
         try:
             date_data = scrape_data_for_date(date, driver)
-            all_data.extend(json.loads(date_data))
+            all_data.extend(date_data)
         except WebDriverException as e:
             print(f"Selenium error occurred while processing {date}: {str(e)}")
             all_data.append({"date": date, "error": str(e), "data": None})
@@ -71,4 +71,4 @@ def run_scrape(driver):
 
     date_object = datetime.strptime(date, "%m-%d-%Y")
     formatted_date = date_object.strftime("%Y-%m-%d")
-    store_data(formatted_date, json.dumps(all_data),"cattleiq/sydneylivestockauction")
+    store_data(formatted_date, all_data,"cattleiq/sydneylivestockauction")

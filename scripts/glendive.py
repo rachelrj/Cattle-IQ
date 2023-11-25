@@ -78,4 +78,4 @@ def run_scrape(driver):
     except Exception as e:
         print(f"An error occurred during the main scrape: {e}")
 
-    store_data(date, json.dumps(market_reports), "cattleiq/glendiveauction")
+    store_data(date, market_reports, "cattleiq/glendiveauction")
