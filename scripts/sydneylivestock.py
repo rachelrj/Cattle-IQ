@@ -5,6 +5,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import WebDriverException, NoSuchElementException
 from datetime import datetime, timedelta
+import sys
+sys.path.append('../helpers')
+from helpers.s3 import store_data
 
 
 def generate_past_dates(days=7, date_format="%m-%d-%Y"):
@@ -31,12 +34,14 @@ def scrape_data_for_date(date, driver):
                 cells = row.find_elements(By.TAG_NAME, 'td')
                 row_data = {headers[index]: cell.text for index, cell in enumerate(cells)}
                 row_data['auction'] = "sydneylivestock"
-                row_data['date'] = date
+                date_object = datetime.strptime(date, "%m-%d-%Y")
+                formatted_date = date_object.strftime("%Y-%m-%d")
+                row_data['date'] = formatted_date
                 data_list.append(row_data)
-        return json.dumps(data_list, indent=2)
+        return data_list
     except NoSuchElementException:
         print(f"No data available for {date}.")
-        return json.dumps([])
+        return []
 
 def run_scrape(driver):
     past_seven_dates_no_zeros = generate_past_dates()
@@ -56,11 +61,14 @@ def run_scrape(driver):
 
         try:
             date_data = scrape_data_for_date(date, driver)
-            all_data.append(json.loads(date_data))
+            all_data.extend(json.loads(date_data))
         except WebDriverException as e:
             print(f"Selenium error occurred while processing {date}: {str(e)}")
             all_data.append({"date": date, "error": str(e), "data": None})
         except Exception as e:
             print(f"An error occurred while processing {date}: {str(e)}")
-            all_data.append({"date": date, "error": str(e), "data": None}) 
-    print(all_data)   
+            all_data.append({"date": date, "error": str(e), "data": None})
+
+    date_object = datetime.strptime(date, "%m-%d-%Y")
+    formatted_date = date_object.strftime("%Y-%m-%d")
+    store_data(formatted_date, json.dumps(all_data),"cattleiq/sydneylivestockauction")

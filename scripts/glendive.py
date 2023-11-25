@@ -7,6 +7,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import json
 import re
+import sys
+sys.path.append('../helpers')
+from helpers.s3 import store_data
 
 def get_report_data(driver, link):
     try:
@@ -54,7 +57,7 @@ def get_report_data(driver, link):
     except Exception as e:
         return {"error": f"Failed to process table data for link {link}: {e}"}
 
-    return data
+    return data, date
 
 def run_scrape(driver):
     wait = WebDriverWait(driver, 10)
@@ -64,17 +67,15 @@ def run_scrape(driver):
         driver.get('http://www.glendivelivestock.com/category/market-reports/')
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "article.post")))
 
-        posts = driver.find_elements(By.CSS_SELECTOR, "article.post:not(#post-218) h1.entry-title a")
-        report_links = [post.get_attribute('href') for post in posts][:3]
+        first_post_link = driver.find_element(By.CSS_SELECTOR, "article.post:not(#post-218) h1.entry-title a").get_attribute('href')
 
-        for link in report_links:
-            report_data = get_report_data(driver, link)
-            if "error" in report_data:
-                print(report_data["error"])
-                continue
+        report_data, date = get_report_data(driver, first_post_link)
+        if "error" in report_data:
+            print(report_data["error"])
+        else:
             market_reports.extend(report_data)
 
     except Exception as e:
         print(f"An error occurred during the main scrape: {e}")
 
-    print(json.dumps(market_reports, indent=4))
+    store_data(date, json.dumps(market_reports), "cattleiq/glendiveauction")

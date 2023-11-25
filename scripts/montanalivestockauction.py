@@ -3,6 +3,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 import re
+import sys
+sys.path.append('../helpers')
+from helpers.s3 import store_data
 
 def run_scrape(driver):
     wait = WebDriverWait(driver, 10)
@@ -10,8 +13,9 @@ def run_scrape(driver):
     try:
         driver.get('https://www.montanalivestockauction.com/market-reports')
         data = web_scraping_test(driver, wait)
-        print(data)
-        # return data
+        date = get_date(wait)
+        store_data(date, data,"cattleiq/montanalivestockauction")
+        
     except Exception as error:
         print(str(error))
 
@@ -53,23 +57,19 @@ def web_scraping_test(driver, wait):
         for button in buttons:
             type_ = button.text.strip().upper()  # Assuming the type is the button text
             try:
-                # Attempt to click the button using standard methods
                 wait.until(EC.element_to_be_clickable(button)).click()
-            except Exception as e:
-                # If standard click fails, use JavaScript to force the click
-                driver.execute_script("arguments[0].click();", button)
-
-            try:
+                
                 # Wait for the corresponding table to load
                 # We assume the table ID follows a specific pattern based on the button text
                 table_id = type_.lower()
                 tab_panel = wait.until(EC.presence_of_element_located((By.ID, table_id)))
                 tbody = tab_panel.find_element(By.TAG_NAME, 'tbody')
                 add_rows(sales, tbody, type_, date)
+
             except Exception as e:
                 print(f"Error clicking on {type_} button or processing its data:", e)
 
     except Exception as e:
-        print("Error in web scraping process:", e)
+        print("Error in web_scraping_test:", e)
 
     return sales
