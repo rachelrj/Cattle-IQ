@@ -2,3 +2,4 @@ selenium==4.15.0
 requests
 bs4
 boto3
+PyMuPDF
