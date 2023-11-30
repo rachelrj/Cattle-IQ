@@ -10,6 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import requests
 from helpers.s3 import store_data 
+from helpers.clickhouse import insert_batches
+from helpers.conversions import convert_entry
 
 def get_last_monday():
     today = datetime.date.today()
@@ -20,6 +22,7 @@ def format_date_for_url(date):
 
 def extract_data_from_pdf_text(pdf_text, date):
     data = []
+    array_of_arrays = []
     current_category = None
     for line in pdf_text.split('\n'):
         if line.strip() == "":
@@ -42,7 +45,32 @@ def extract_data_from_pdf_text(pdf_text, date):
                     "Category": current_category,
                     "Date": date.strftime("%Y-%m-%d")
                 })
-    return data
+                amount_and_class = parts[1].split(' ')
+                amount = amount_and_class[0]
+                claz = amount_and_class[1]
+                price_factor_and_price = parts[3].split('/')
+                price_factor = price_factor_and_price[1]
+                price = price_factor_and_price[0]
+                try:
+                    entry = convert_entry(
+                        date,
+                        "Headwater",
+                        "MT",
+                        "Headwater Livestock Auction",
+                        "Auction",
+                        claz,
+                        100002,
+                        price_factor,
+                        amount,
+                        parts[2].replace("#", "").replace(" ", ""),
+                        price,
+                        None, None, None, None, parts[0], None, None
+                    )
+                    if entry and len(entry):
+                        array_of_arrays.append(entry)
+                except Exception as e:
+                    print(f"An clickhouse error occurred for Headwater: {e}")
+    return data, array_of_arrays
 
 def find_and_download_pdfs(driver, base_url, download_dir):
     monday = get_last_monday()
@@ -58,10 +86,8 @@ def find_and_download_pdfs(driver, base_url, download_dir):
 
         if iframe_src:
             print(f"Found iframe source: {iframe_src}")
-            # Use requests to download the iframe content
             response = requests.get(iframe_src)
             if response.status_code == 200:
-                # Assuming the content is a PDF file
                 filename = f"{formatted_date}.pdf"  # You can customize the filename as needed
                 file_path = os.path.join(download_dir, filename)
                 with open(file_path, 'wb') as f:
@@ -85,6 +111,7 @@ def extract_date_from_filename(filename):
 
 def process_downloaded_pdfs(download_dir, formatted_date):
     all_extracted_data = []  # List to store all extracted data
+    all_array_of_arrays = []
     target_file = None
 
     for file in os.listdir(download_dir):
@@ -102,8 +129,9 @@ def process_downloaded_pdfs(download_dir, formatted_date):
                 with fitz.open(file_path) as pdf:
                     for page in pdf:
                         page_text = page.get_text("text")
-                        extracted_data = extract_data_from_pdf_text(page_text, date.date())
+                        extracted_data, array_of_arrays = extract_data_from_pdf_text(page_text, date.date())
                         all_extracted_data.extend(extracted_data)
+                        all_array_of_arrays.extend(array_of_arrays)
             else:
                 print(f"Could not extract date from filename {target_file}")
         except Exception as e:
@@ -116,6 +144,8 @@ def process_downloaded_pdfs(download_dir, formatted_date):
     else:
         print(f"No PDF file found for date {formatted_date}.")
     store_data(formatted_date_str, all_extracted_data, "cattleiq/headwater")
+    if(len(all_array_of_arrays)):
+        insert_batches(all_array_of_arrays, "Headwater", formatted_date_str)
 
 def run_scrape(driver):
     download_dir = "/shared-data/"
