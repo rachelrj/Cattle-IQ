@@ -4,7 +4,6 @@ import re
 import json
 import os
 import time
-from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.common.by import By
@@ -92,9 +91,9 @@ def process_downloaded_pdfs(download_dir):
 
 def run_scrape(driver):
     try:
-        download_dir = os.getcwd()
+        download_dir = "/lib"        
         base_url = "https://headwaterslivestockauction.com/market-report/hla-"
-
+        driver = driver(download_dir)
         find_and_download_pdfs(driver, base_url, download_dir)
         process_downloaded_pdfs(download_dir)
     except Exception as e:
