@@ -84,12 +84,5 @@ def run_scrape(driver):
     # Filter the data to only include rows where all columns are populated
     filtered_data = [row for row in all_data if all(row.values())]
 
-    # Print the filtered JSON output
-    print(json.dumps(filtered_data, indent=4))
-
     store_data(date, filtered_data, "cattleiq/dillionauction")
-
-
-# Example usage, assuming the driver is provided by the index file:
-# driver = webdriver.Firefox(executable_path='C:\\geckodriver.exe', options=firefox_options)
-# run_scrape(driver)
+    

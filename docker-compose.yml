@@ -6,6 +6,7 @@ services:
       - robottestsnw
     volumes:
       - .:/usr/app/
+      - shared:/shared-data
     ports:
       - "3000:3000"
     depends_on:
@@ -17,6 +18,8 @@ services:
   selenium_hub:
     image: selenium/hub:4.15.0-20231108
     container_name: selenium_hub
+    volumes:
+      - shared:/shared-data
     ports:
       - "4442:4442"
       - "4443:4443"
@@ -27,6 +30,8 @@ services:
   firefox:
     image: selenium/node-firefox:4.15.0-20231108
     shm_size: 2gb
+    volumes:
+      - shared:/shared-data
     depends_on:
       - selenium_hub
     environment:
@@ -39,4 +44,6 @@ services:
 networks:
   robottestsnw:
     driver: bridge
-    
+
+volumes:
+  shared:   
