@@ -16,10 +16,10 @@ def run_scrapes():
 
     # Use locally to connect to hub
     # Use on AWS container to connect to hub
-    # hub_url = "http://localhost:4444/wd/hub"
+    hub_url = "http://localhost:4444/wd/hub"
 
     # Use within docker local container to connect to hub
-    hub_url = "http://selenium_hub:4444/wd/hub"
+    # hub_url = "http://selenium_hub:4444/wd/hub"
     shared_folder = "/shared-data/"
 
     options = webdriver.FirefoxOptions()
