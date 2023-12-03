@@ -44,7 +44,7 @@ def extract_data_from_pdf_text(pdf_text, date):
                     "Date": date.strftime("%Y-%m-%d")
                 })
     print(data)
-    store_data(date, data, "cattleiq/lewistown")
+    store_data(date, data, "cattleiq/headwater")
     return data
 
 def print_pdf_contents(file_path):
