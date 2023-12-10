@@ -68,21 +68,19 @@ def run_scrape(driver):
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "a.wp-block-file__button"))
     )
-    links = driver.find_elements(By.CSS_SELECTOR, "a.wp-block-file__button")[:3]
-    document_links = [link.get_attribute('href') for link in links]
+    link = driver.find_element(By.CSS_SELECTOR, "a.wp-block-file__button")
+    document_url = link.get_attribute('href')
 
     # Download and parse each document
     all_data = []
-    for document_url in document_links:
-        try:
-            doc_stream = download_document(document_url)
-            parsed_data, date = parse_document_tables(doc_stream)
-            all_data.extend(parsed_data)
-        except Exception as e:
-            print(f"An error occurred: {e}")
+    try:
+        doc_stream = download_document(document_url)
+        parsed_data, date = parse_document_tables(doc_stream)
+        all_data.extend(parsed_data)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     # Filter the data to only include rows where all columns are populated
     filtered_data = [row for row in all_data if all(row.values())]
-
     store_data(date, filtered_data, "cattleiq/dillionauction")
     
