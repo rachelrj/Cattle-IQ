@@ -69,6 +69,8 @@ def run_scrape(driver):
             print(f"An error occurred while processing {date}: {str(e)}")
             all_data.append({"date": date, "error": str(e), "data": None})
 
-    date_object = datetime.strptime(date, "%m-%d-%Y")
-    formatted_date = date_object.strftime("%Y-%m-%d")
-    store_data(formatted_date, all_data,"cattleiq/sydneylivestockauction")
+    if all_data:  # Check if all_data is not empty before storing
+        date_object = datetime.strptime(date, "%m-%d-%Y")
+        formatted_date = date_object.strftime("%Y-%m-%d")
+        store_data(formatted_date, all_data,"cattleiq/sydneylivestockauction")
+
