@@ -19,9 +19,14 @@ def get_last_monday():
     today = datetime.date.today()
     return today - datetime.timedelta(days=today.weekday())
 
+def format_date_for_url(date):
+    # Format the date with no leading zeros for month and day
+    return date.strftime("%-m-%-d-%y") if os.name != 'nt' else date.strftime("%#m-%#d-%y")
+
 def get_pdf_url(base_url):
     monday = get_last_monday()
-    return f"https://headwaterslivestockauction.com/wp-content/uploads/{monday.year}/{monday.month}/{monday.strftime('%m-%d-%y')}-detailed-market-report.pdf"
+    formatted_date = format_date_for_url(monday)
+    return f"{base_url}{formatted_date}"
 
 def extract_data_from_pdf_text(pdf_text, date):
     data = []
@@ -64,7 +69,7 @@ def download_pdf(pdf_url, download_dir):
         with open(file_path, 'wb') as pdf_file:
             pdf_file.write(pdf_content)
         print(f"Downloaded {file_path}")
-        return file_path;
+        return file_path
     else:
         print(f"Failed to download {pdf_url}: Status code {response.status_code}")
 
