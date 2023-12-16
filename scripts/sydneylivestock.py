@@ -45,32 +45,29 @@ def scrape_data_for_date(date, driver):
 
 def run_scrape(driver):
     past_seven_dates_no_zeros = generate_past_dates()
-    all_data = []
+    
     for date in past_seven_dates_no_zeros:
         url = f"https://sidneylivestock.com/{date}/"
         try:
             response = requests.head(url)
             if response.status_code == 404:
-                response = requests.get(url)  # Some servers don't respond correctly to HEAD, retry with GET
+                response = requests.get(url)  # Retry with GET if HEAD request fails
                 if response.status_code == 404:
+                    print(f"No data available for {date}.")
                     continue
         except requests.RequestException as e:
             print(f"Request exception occurred for {url}: {e}")
-            all_data.append({"date": date, "error": str(e), "data": None})
             continue
 
         try:
             date_data = scrape_data_for_date(date, driver)
-            all_data.extend(date_data)
+            if date_data:  # Only store data if there is data to store
+                formatted_date = datetime.strptime(date, "%m-%d-%Y").strftime("%Y-%m-%d")
+                store_data(formatted_date, date_data, "cattleiq/sydneylivestockauction")
+            else:
+                print(f"No data to store for {date}.")
         except WebDriverException as e:
             print(f"Selenium error occurred while processing {date}: {str(e)}")
-            all_data.append({"date": date, "error": str(e), "data": None})
         except Exception as e:
             print(f"An error occurred while processing {date}: {str(e)}")
-            all_data.append({"date": date, "error": str(e), "data": None})
-
-    if all_data:  # Check if all_data is not empty before storing
-        date_object = datetime.strptime(date, "%m-%d-%Y")
-        formatted_date = date_object.strftime("%Y-%m-%d")
-        store_data(formatted_date, all_data,"cattleiq/sydneylivestockauction")
 
