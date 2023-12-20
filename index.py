@@ -14,7 +14,6 @@ def run_scrapes():
     # TODO: Fix this. Avoid the need to sleep.
     time.sleep(200)
 
-    # Use locally to connect to hub
     # Use on AWS container to connect to hub
     hub_url = "http://localhost:4444/wd/hub"
 
