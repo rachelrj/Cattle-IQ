@@ -41,11 +41,11 @@ The firefox node will execute the scrapes that have been loaded onto the hub.
 
 ## Docker
 
-[Install Docker] (https://docs.docker.com/get-docker/)
+[Install Docker](https://docs.docker.com/get-docker/)
 
 ## AWS
 
-Save your [Credentials] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) in your local config file. Ask team for access if needed.
+Save your [Credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) in your local config file. Ask team for access if needed.
 
 # Running
 
