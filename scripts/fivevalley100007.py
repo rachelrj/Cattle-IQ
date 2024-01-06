@@ -35,7 +35,6 @@ def scrape_table_data(driver, link):
         for row in rows:
             cells = row.find_elements(By.TAG_NAME, 'td')
             row_data = {f"Column{index+1}": cell.text.strip() for index, cell in enumerate(cells)}
-            print(row_data)
             row_data['Date'] = date
             row_data['Auction'] = "FiveValley"
             data_list.append(row_data)
@@ -61,7 +60,7 @@ def scrape_table_data(driver, link):
                         None,
                         None,
                         row_data['Column3'] if row_data['Column3'] else None)
-                    if convert_entry and len(convert_entry):
+                    if converted_row and len(converted_row):
                         converted_array_of_arrays.append(converted_row)
             except Exception as e:
                 print("Could not convert row for Five Valleys:")
