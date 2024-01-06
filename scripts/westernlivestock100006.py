@@ -16,10 +16,7 @@ def run_scrape(driver):
 
     try:
         driver.get('https://westernlivestockmontana.com/market-report')
-        data, clickhouse_data, date = web_scraping_logic(driver, wait)
-        store_data(date, data, "cattleiq/westernlivestockauction")
-        if clickhouse_data and len(clickhouse_data):
-            insert_batches(clickhouse_data, "Western Livestock", date)
+        web_scraping_logic(driver, wait)
     except Exception as error:
         print(f"An error occurred running Western Livestock: {error}")
         return str(error)
@@ -93,5 +90,6 @@ def web_scraping_logic(driver, wait):
         table_data, ch_data = parse_table_data(table, date, report_title)
         market_data.extend(table_data)
         clickhouse_data.extend(ch_data)
-    
-    return market_data, clickhouse_data, date
+        store_data(date, table_data, "cattleiq/westernlivestockauction")
+        if ch_data and len(ch_data):
+            insert_batches(ch_data, "Western Livestock", date)

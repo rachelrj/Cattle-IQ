@@ -116,13 +116,11 @@ def insert_batches(normalized_records, auction_name, date):
             records_to_add.append(record)
             if len(records_to_add) == batch_size:
                 wait_for_available_slots(10, client)
-                inserted_records = client.insert('transactions', records_to_add, column_names=record_columns)
-                print(inserted_records)
+                client.insert('transactions', records_to_add, column_names=record_columns)
                 records_to_add.clear()
         if records_to_add:
             wait_for_available_slots(10, client)
-            inserted_records = client.insert('transactions', records_to_add, column_names=record_columns)
-            print(inserted_records)
+            client.insert('transactions', records_to_add, column_names=record_columns)
             records_to_add.clear()
     except Exception as e:
         message = f"Failed to insert records for: {auction_name} on {date}"
