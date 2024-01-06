@@ -358,14 +358,14 @@ def convert_entry(date, city, state, market_location_name, market_type, claz, ma
         print(f"Record not stored. Weight {avg_weight} does not exist")
         return  
     if (not date):
-        print(f"Record not stored. Date does not exist")  
+        print(f"Record not stored for clickhouse. Date does not exist")  
         return
     if (not market_id or market_id == 0):
-        print(f"Record not stored. Market ID does not exist") 
+        print(f"Record not stored for clickhouse. Market ID does not exist") 
         return 
     converted_price_unit = convert_price_factor(price_unit)
     if (not converted_price_unit):
-        print(f"Record not stored. Price unit {price_unit} invalid")
+        print(f"Record not stored for clickhouse. Price unit {price_unit} invalid")
 
     buyer_seller = ''
     if (buyer):

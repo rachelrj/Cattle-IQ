@@ -102,7 +102,8 @@ def run_scrape(driver):
                 None,
                 None,
                 None,
-                buyer = row['Name'])
+                row['Name'],
+                None)
             if converted_row and len(converted_row):
                 converted_data.append(converted_row)
         insert_batches(converted_data, "Dillon Livestock", date)
