@@ -12,6 +12,8 @@ from datetime import datetime
 import sys
 sys.path.append('../helpers')
 from helpers.s3 import store_data
+from helpers.conversions import convert_entry
+from helpers.clickhouse import insert_batches
 
 # Function to convert date format from mm/dd/YYYY to YYYY-mm-dd
 def convert_date_format(date_str):
@@ -60,10 +62,8 @@ def parse_document_tables(doc_stream):
     return parsed_data, date
 
 def run_scrape(driver):
-    # URL of the page where the documents are listed
     url = 'https://dillonlivestockauction.com/market-reports/'
 
-    # Get the first three document links
     driver.get(url)
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "a.wp-block-file__button"))
@@ -71,7 +71,6 @@ def run_scrape(driver):
     link = driver.find_element(By.CSS_SELECTOR, "a.wp-block-file__button")
     document_url = link.get_attribute('href')
 
-    # Download and parse each document
     all_data = []
     try:
         doc_stream = download_document(document_url)
@@ -80,7 +79,33 @@ def run_scrape(driver):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    # Filter the data to only include rows where all columns are populated
     filtered_data = [row for row in all_data if all(row.values())]
-    store_data(date, filtered_data, "cattleiq/dillionauction")
-    
+    store_data(date, filtered_data, "cattleiq/dillonauction")
+
+    try:
+        converted_data = []
+        for row in filtered_data:
+            converted_row = convert_entry(
+                date, 
+                "Dillon", 
+                "MT", 
+                "Dillon",
+                "Auction",
+                row['Desc'],
+                100001,
+                row['PF'],
+                row['Qty'],
+                row['AvgWT'],
+                row['Bid'],
+                None,
+                None,
+                None,
+                None,
+                None,
+                buyer = row['Name'])
+            if converted_row and len(converted_row):
+                converted_data.append(converted_row)
+        insert_batches(converted_data, "Dillon Livestock", date)
+    except Exception as e:
+        print(f"An clickhouse error occurred for Dillon: {e}")
+        

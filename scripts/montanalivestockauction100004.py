@@ -6,6 +6,9 @@ import re
 import sys
 sys.path.append('../helpers')
 from helpers.s3 import store_data
+from helpers.conversions import convert_entry
+from helpers.redshift import store_redshift
+from helpers.clickhouse import insert_batches
 
 def run_scrape(driver):
     wait = WebDriverWait(driver, 10)
@@ -31,6 +34,7 @@ def get_date(wait):
 
 def add_rows(sales, tbody, type_, date):
     rows = tbody.find_elements(By.TAG_NAME, 'tr')
+    array_of_arrays = []
     for row in rows:
         tds = row.find_elements(By.TAG_NAME, 'td')
         info = {
@@ -45,7 +49,36 @@ def add_rows(sales, tbody, type_, date):
             "auction": "montanalivestock"
         }
         sales.append(info)
-
+        try: 
+            entry = convert_entry(
+                date,
+                "Butte",
+                "MT",
+                "Montana Livestock Auction",
+                "Auction",
+                info["kind"],
+                100004,
+                info["unit"],
+                info["head"],
+                info["weight"],
+                info["price"],
+                None,
+                None,
+                None,
+                None,
+                info["type"],
+                None,
+                None
+            )
+            array_of_arrays.append(entry)
+        except Exception as e:
+            print(f"An error occurred convering entry from Montana Livestock: {e}")
+    if (array_of_arrays and len(array_of_arrays)):
+        try:
+            insert_batches(array_of_arrays, "Montana Livestock", date)
+        except Exception as e:
+            print(f"An error sending to clickhouse from Montana Livestock: {e}")        
+        
 def web_scraping_test(driver, wait):
     sales = []
 

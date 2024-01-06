@@ -1,10 +1,9 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from helpers.s3 import store_data
 import re
 from datetime import datetime
-
+from helpers.s3 import store_data
 
 def get_table_data(driver, wait):
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, "table-bordered")))
@@ -12,7 +11,6 @@ def get_table_data(driver, wait):
     headers = [header.text for header in table.find_elements(By.TAG_NAME, 'th')]
     rows = table.find_elements(By.TAG_NAME, 'tr')[1:]  # Skip the header row
     data = []
-    
     for row in rows:
         cols = row.find_elements(By.TAG_NAME, 'td')
         # get date
@@ -38,17 +36,15 @@ def get_table_data(driver, wait):
         except Exception as error:
             print(error)        
 
-    return data
+    return data, date
 
 def run_scrape(driver):
     wait = WebDriverWait(driver, 10)
     try:
         driver.get('https://www.glasgowstockyards.com/marketreport.php')
 
-        market_reports = get_table_data(driver, wait)
-
-        for date, records in market_reports.items():
-            store_data(date, records, "cattleiq/glendiveauction")
+        market_reports, date = get_table_data(driver, wait)
+        store_data(date, market_reports, "cattleiq/glasgow")
 
     except Exception as e:
         print(f"An error occurred: {e}")

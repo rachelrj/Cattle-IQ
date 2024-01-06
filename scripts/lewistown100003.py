@@ -9,6 +9,8 @@ import re
 import sys
 sys.path.append('../helpers')
 from helpers.s3 import store_data
+from helpers.clickhouse import insert_batches
+from helpers.conversions import convert_entry
 
 def get_report_data(driver, link):
     try:
@@ -36,7 +38,7 @@ def get_report_data(driver, link):
         for table in tables:
             headers = [header.text for header in table.find_elements(By.TAG_NAME, 'th')]
             rows = table.find_elements(By.TAG_NAME, 'tr')
-
+            array_of_arrays = []
             for row in rows:
                 cols = row.find_elements(By.TAG_NAME, 'td')
                 if len(cols) > 0:
@@ -44,21 +46,44 @@ def get_report_data(driver, link):
                     entry['Date'] = converted_date
                     entry['Auction'] = "lewistown"
                     data.append(entry)
+                    converted_entry = convert_entry(
+                        converted_date,
+                        "Lewiston",
+                        "MT",
+                        "Lewiston Livestock",
+                        "Auction",
+                        entry["Desc"],
+                        100003,
+                        entry["PF"],
+                        entry["Qty"],
+                        entry["AvgWT"],
+                        entry["Bid"],
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        entry["Name"],
+                        None
+                    )
+                    if converted_entry and len(converted_entry):
+                        array_of_arrays.append(converted_entry)
     except Exception as e:
         return {"error": f"Error while processing table data: {e}"}
 
-    return data, converted_date
+    return data, converted_date, array_of_arrays
 
 def run_scrape(driver):
     market_reports = []
 
     try:
-        report_data, date = get_report_data(driver, 'https://www.lewistownlivestock.com/market-reports')
+        report_data, date, array_of_arrays = get_report_data(driver, 'https://www.lewistownlivestock.com/market-reports')
         if 'error' in report_data:
             print(report_data['error'])
         else:
             market_reports.extend(report_data)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
+    if len(array_of_arrays):
+        insert_batches(array_of_arrays, "Lewiston", date)
     store_data(date, report_data, "cattleiq/lewistown")
