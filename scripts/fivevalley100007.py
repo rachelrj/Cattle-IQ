@@ -16,10 +16,14 @@ def scrape_latest_link(driver, wait):
     return latest_link
 
 def extract_date_from_link(link):
-    match = re.search(r'Representative-Sales--(\w+-\d{1,2}-\d{4})', link)
+    match = re.search(r'(Representative-Sales--|Representative-Sale--).*?(\w+-\d{1,2}-\d{4})', link)
     if match:
-        date_str = match.group(1).replace('-', ' ')
-        return datetime.strptime(date_str, '%B %d %Y').strftime('%Y-%m-%d')
+        date_str = match.group(2).replace('-', ' ')
+        try:
+            return datetime.strptime(date_str, '%B %d %Y').strftime('%Y-%m-%d')
+        except ValueError:
+            print(f"Date format error for URL: {link}")
+            return None
     return None
 
 def scrape_table_data(driver, link):
