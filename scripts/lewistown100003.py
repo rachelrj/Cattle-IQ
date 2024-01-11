@@ -75,15 +75,30 @@ def get_report_data(driver, link):
 
 def run_scrape(driver):
     market_reports = []
+    array_of_arrays = []
 
     try:
-        report_data, date, array_of_arrays = get_report_data(driver, 'https://www.lewistownlivestock.com/market-reports')
-        if 'error' in report_data:
-            print(report_data['error'])
-        else:
-            market_reports.extend(report_data)
+        # Navigate to the reports page and get the first report link
+        base_url = 'https://www.lewistownlivestock.com'
+        driver.get(base_url + '/market-reports')
+        new_links = [link.get_attribute('href') for link in driver.find_elements(By.CSS_SELECTOR, "a.blog-more-link")]
+        if new_links:
+            # Retrieve only the first link
+            report_link = new_links[0]
+            report_link = report_link if report_link.startswith('http') else base_url + report_link
+
+            # Process the report link
+            report_data, date, array_of_arrays = get_report_data(driver, report_link)
+            if 'error' in report_data:
+                print(report_data['error'])
+            else:
+                market_reports.extend(report_data)
+                if len(array_of_arrays):
+                    insert_batches(array_of_arrays, "Lewiston", date)
+                store_data(date, report_data, "cattleiq/lewistown")
+
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-    if len(array_of_arrays):
-        insert_batches(array_of_arrays, "Lewiston", date)
-    store_data(date, report_data, "cattleiq/lewistown")
+
+
+
