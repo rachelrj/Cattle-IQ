@@ -338,6 +338,9 @@ def remove_except_dots_and_numbers(s):
     return re.sub(r'[^0-9\.]+', '', s)
 
 def extract_number(string):
+    # Remove numbers after decimal point
+    string = re.sub(r'\.\d+', '', string)
+    # Extract numbers
     number_str = ''.join(re.findall(r'\d+', string))
     return int(number_str) if number_str else None
 
