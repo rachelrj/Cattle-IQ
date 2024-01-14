@@ -4,7 +4,7 @@ from botocore.exceptions import ClientError
 import re
 from .error_email import send_error_email
 import datetime
-from datetime import datetime
+from datetime import datetime, date
 import hashlib
 
 def convert_floats_to_decimals(item):
@@ -316,7 +316,7 @@ def convert_class(claz):
 
     print(f"COULD NOT INTERPRET CLASS FOR {claz}")
     message = f"An error occurred transforming {claz} into a class."
-    # send_error_email(message)
+    send_error_email(message)
 
     return
 
@@ -344,7 +344,7 @@ def extract_number(string):
     number_str = ''.join(re.findall(r'\d+', string))
     return int(number_str) if number_str else None
 
-def convert_entry(date, city, state, market_location_name, market_type, claz, market_id, price_unit, head_count, avg_weight, avg_price, auction_name=None, report_title=None, commodity=None, age=None, breed=None, buyer=None, seller=None):
+def convert_entry(date_input, city, state, market_location_name, market_type, claz, market_id, price_unit, head_count, avg_weight, avg_price, auction_name=None, report_title=None, commodity=None, age=None, breed=None, buyer=None, seller=None):
     avg_price = extract_number(avg_price)
     if (not avg_price or avg_price == 0):
         print(f"Record not stored. Response: price is {avg_price} from {market_location_name}")
@@ -360,7 +360,7 @@ def convert_entry(date, city, state, market_location_name, market_type, claz, ma
     if (not converted_average_weight or converted_average_weight == 0):
         print(f"Record not stored. Weight {avg_weight} does not exist")
         return  
-    if (not date):
+    if (not date_input):
         print(f"Record not stored for clickhouse. Date does not exist")  
         return
     if (not market_id or market_id == 0):
@@ -377,11 +377,19 @@ def convert_entry(date, city, state, market_location_name, market_type, claz, ma
         buyer_seller = seller
 
     date_object = None
-    try:
-        date_object = datetime.strptime(date, "%Y-%m-%d")
-    except:
-        print("Failed to convert date into formatted date")
-        return
+    if isinstance(date_input, (datetime, date)):
+        date_object = date_input
+    else:
+        try:
+            print("Attempting to convert date:", date_input)
+            date_object = datetime.strptime(date_input, "%Y-%m-%d")
+        except ValueError as e:
+            print("Failed to convert date into formatted date:", e)
+            return None
+        except Exception as e:
+            print("An unexpected error occurred:", e)
+            return None
+
     md5_hash = None
 
     try: 
@@ -425,6 +433,6 @@ def convert_entry(date, city, state, market_location_name, market_type, claz, ma
             breed if breed else None
             ]
     except Exception as e:
-        message = f"Failed to convert record: {market_location_name}, {date}: {e}"
-        # send_error_email(message)
+        message = f"Failed to convert record: {market_location_name}, {date_input}: {e}"
+        send_error_email(message)
         print(message)

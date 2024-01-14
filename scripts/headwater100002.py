@@ -12,6 +12,7 @@ import requests
 from helpers.s3 import store_data 
 from helpers.clickhouse import insert_batches
 from helpers.conversions import convert_entry
+from helpers.error_email import send_error_email
 
 def get_last_monday():
     today = datetime.date.today()
@@ -69,6 +70,7 @@ def extract_data_from_pdf_text(pdf_text, date):
                     if entry and len(entry):
                         array_of_arrays.append(entry)
                 except Exception as e:
+                    send_error_email(f"An clickhouse error occurred for Headwater: {e}")
                     print(f"An clickhouse error occurred for Headwater: {e}")
     return data, array_of_arrays
 
@@ -95,10 +97,13 @@ def find_and_download_pdfs(driver, base_url, download_dir):
                 print(f"Downloaded iframe content to '{file_path}'")
                 return formatted_date
             else:
+                send_error_email(f"Failed to download content from {iframe_src}")
                 print(f"Failed to download content from {iframe_src}")
         else:
+            send_error_email(f"No iframe source found for Headwater: {iframe_src}")
             print("No iframe source found.")
     except Exception as e:
+        send_error_email(f"Error processing URL {page_url}: {e}")
         print(f"Error processing URL {page_url}: {e}")
         print(traceback.format_exc())
 
@@ -133,8 +138,10 @@ def process_downloaded_pdfs(download_dir, formatted_date):
                         all_extracted_data.extend(extracted_data)
                         all_array_of_arrays.extend(array_of_arrays)
             else:
+                send_error_email(f"Could not extract date from filename {target_file}")
                 print(f"Could not extract date from filename {target_file}")
         except Exception as e:
+            send_error_email(f"Error processing PDF file {target_file}: {e}")
             print(f"Error processing PDF file {target_file}: {e}")
             print(traceback.format_exc())
         finally:
@@ -142,6 +149,7 @@ def process_downloaded_pdfs(download_dir, formatted_date):
             os.remove(file_path)
             print(f"Deleted file: {file_path}")
     else:
+        send_error_email(f"No Headwater PDF file found for date {formatted_date}.")
         print(f"No PDF file found for date {formatted_date}.")
     store_data(formatted_date_str, all_extracted_data, "cattleiq/headwater")
     if(len(all_array_of_arrays)):

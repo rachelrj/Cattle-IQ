@@ -124,7 +124,7 @@ def insert_batches(normalized_records, auction_name, date):
             records_to_add.clear()
     except Exception as e:
         message = f"Failed to insert records for: {auction_name} on {date}"
-        # send_error_email(message)
+        send_error_email(message)
         print(message)
         print(e)
         
