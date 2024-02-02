@@ -4,6 +4,9 @@ from selenium.webdriver.firefox.options import Options
 import os
 import importlib
 import time
+import sys
+from datetime import datetime, timedelta
+from usda.usda import send_clickhouse
 
 def run_scrapes():
 
@@ -56,5 +59,11 @@ def run_scrapes():
 
     driver.quit()
 
+def run_usda():
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    send_clickhouse(yesterday, current_date)
+
 if __name__ == "__main__":
     run_scrapes()
+    run_usda()
