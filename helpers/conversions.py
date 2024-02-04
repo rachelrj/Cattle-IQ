@@ -346,6 +346,7 @@ def extract_number(string):
 
 def convert_entry(date_input, city, state, market_location_name, market_type, claz, market_id, price_unit, head_count, avg_weight, avg_price, auction_name=None, report_title=None, commodity=None, age=None, breed=None, buyer=None, seller=None):
     avg_price = extract_number(avg_price)
+    auction_name = auction_name or market_location_name
     if (not avg_price or avg_price == 0):
         print(f"Record not stored. Response: price is {avg_price} from {market_location_name}")
         return
