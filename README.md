@@ -1,6 +1,6 @@
 # CattleIQ
 
-CattleIQ is a python application which scrapes cattle market reports and stores these records in both AWS S3 and in NOT DECIDED DATABASE.
+CattleIQ is a python application which scrapes cattle market reports and stores these records in both AWS S3 and in Clickhouse.
 
 This application is ran regularly via AWS eventbridge to scrape new data.
 
