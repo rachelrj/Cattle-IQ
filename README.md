@@ -65,6 +65,14 @@ How are errors handled? Currently errors are emailed to the maintainers. The ema
 
 Is there any logging within the application? The print statements are logged to AWS Cloudwatch. More in depth logging is intended for the future.
 
+## License
+
+**CattleIQ** is licensed under the MIT License.
+
+Copyright (c) 2025 rachelrj
+
+You can do whatever you want with this software, including modifying, distributing, and using it, as long as you include this license and copyright notice. The software is provided "as is" without any warranties.
+
 # Maintainers
 
 Rachel Joyce - rachel@cattleiq.com
