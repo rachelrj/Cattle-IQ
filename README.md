@@ -12,8 +12,9 @@ This application is Dockerized in order to be stored in ECR and ran as a ECS tas
 2. [Requirements](#requirements)
 3. [Running](#running)
 4. [FAQ](#faq)
-5. [Maintainers](#maintainers)
-6. [Contacts](#contacts)
+5. [License](#License)
+6. [Maintainers](#maintainers)
+7. [Contacts](#contacts)
 
 # Architecture
 
